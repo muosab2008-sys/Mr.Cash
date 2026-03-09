@@ -2,14 +2,25 @@
 import { Wallet, UserPlus, CircleDollarSign, Gift, User } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useAuth } from '@/contexts/auth-context' // استيراد حالة تسجيل الدخول
+import { useAuth } from '@/contexts/auth-context' 
 
 const BottomNav = () => {
   const pathname = usePathname()
-  const { user } = useAuth() // التأكد من وجود مستخدم
+  
+  // نستخدم try-catch أو فحصاً آمناً لتجنب انهيار الـ Build في صفحات مثل 404
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (e) {
+    authContext = null;
+  }
 
-  // إذا لم يسجل المستخدم دخوله، لا تظهر الشريط أبداً
-  if (!user) return null
+  // إذا لم يكن هناك Context (مثل وقت البناء) أو لم يسجل المستخدم دخوله، لا تظهر شيئاً
+  if (!authContext || !authContext.user || authContext.loading) {
+    return null;
+  }
+
+  const { user } = authContext;
 
   const navItems = [
     { name: 'Cashout', icon: Wallet, href: '/withdraw' },
